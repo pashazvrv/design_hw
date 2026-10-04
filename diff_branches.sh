@@ -3,7 +3,7 @@
 
 REPO_URL="$1"
 BRANCH_1="$2"
-BRANCH_2="$3"
+BRANCH_2="$3" 
 REPORT="diff_report_${BRANCH_1}_vs_${BRANCH_2}.txt"
 
 TMP_DIR=$(mktemp -d)
