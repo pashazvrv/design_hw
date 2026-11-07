@@ -1,0 +1,3 @@
+app_user: app
+app_dir: /opt/app
+app_port: 8080

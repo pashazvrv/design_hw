@@ -1,0 +1,23 @@
+services:
+  master:
+    build: ./docker/master
+    container_name: ansible-master
+    working_dir: /ansible
+    environment:
+      ANSIBLE_CONFIG: /ansible/ansible.cfg
+    volumes:
+      - ./ansible:/ansible
+    depends_on:
+      - nginx-server
+      - app-server
+
+  nginx-server:
+    build: ./docker/node
+    container_name: nginx-server
+    ports:
+      - "8080:80"
+
+  app-server:
+    build: ./docker/node
+    container_name: app-server
+
