@@ -1,0 +1,27 @@
+---
+- name: Установить nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: Убрать стандартную страницу
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: reload nginx
+
+- name: Положить конфиг reverse proxy
+  template:
+    src: app.conf.j2
+    dest: /etc/nginx/conf.d/app.conf
+  notify: reload nginx
+
+- name: Проверить конфиг (nginx -t)
+  command: nginx -t
+  changed_when: false
+
+- name: Запустить nginx, если он не запущен
+  shell: pgrep -x nginx >/dev/null && echo running || (nginx && echo started)
+  register: nginx_start
+  changed_when: "'started' in nginx_start.stdout"

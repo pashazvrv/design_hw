@@ -1,0 +1,55 @@
+---
+- name: Установить компоненты
+  apt:
+    name:
+      - python3-pip
+      - python3-venv
+    state: present
+    update_cache: yes
+
+- name: Создать пользователя приложения
+  user:
+    name: "{{ app_user }}"
+    shell: /bin/bash
+
+- name: Создать каталог приложения
+  file:
+    path: "{{ app_dir }}"
+    state: directory
+    owner: "{{ app_user }}"
+
+- name: Скопировать код приложения
+  copy:
+    src: "{{ item }}"
+    dest: "{{ app_dir }}/{{ item }}"
+    owner: "{{ app_user }}"
+  loop:
+    - app.py
+    - requirements.txt
+
+- name: Скопировать скрипт запуска
+  copy:
+    src: start.sh
+    dest: "{{ app_dir }}/start.sh"
+    owner: "{{ app_user }}"
+    mode: "0755"
+
+- name: Установить зависимости в venv
+  pip:
+    requirements: "{{ app_dir }}/requirements.txt"
+    virtualenv: "{{ app_dir }}/venv"
+    virtualenv_command: python3 -m venv
+
+- name: Запустить приложение скриптом start.sh
+  command: runuser -u {{ app_user }} -- {{ app_dir }}/start.sh
+  register: app_start
+  changed_when: "'started' in app_start.stdout"
+
+- name: Проверить, что приложение отвечает
+  uri:
+    url: "http://localhost:{{ app_port }}/health"
+    return_content: yes
+  register: health
+  retries: 10
+  delay: 1
+  until: health.status == 200

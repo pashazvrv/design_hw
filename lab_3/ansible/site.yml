@@ -1,0 +1,10 @@
+---
+- name: Деплой
+  hosts: app
+  roles:
+    - app
+
+- name: Установка и настройка nginx
+  hosts: nginx
+  roles:
+    - nginx
